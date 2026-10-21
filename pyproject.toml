@@ -1,0 +1,27 @@
+[project]
+name = "gh-notify"
+version = "0.1.0"
+description = "macOS status bar app for GitHub review requests, comments and CI failures"
+readme = "README.md"
+authors = [
+    { name = "David Gillespie", email = "david.gillespie@digital.cabinet-office.gov.uk" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "desktop-notifier>=6.2.0",
+    "pyobjc-framework-cocoa>=12.2.2",
+    "rumps>=0.4.0",
+]
+
+[project.scripts]
+gh-notify = "gh_notify:main"
+
+[build-system]
+requires = ["uv_build>=0.11.17,<0.12.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+    "ruff>=0.17.1",
+]
