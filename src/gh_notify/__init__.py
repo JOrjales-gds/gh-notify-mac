@@ -1,3 +1,3 @@
-from gh_notify.spike import main
+from gh_notify.cli import main
 
 __all__ = ["main"]
