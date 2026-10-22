@@ -54,6 +54,12 @@ def in_rumps() -> None:
 
     app = rumps.App("spike", title="spike", quit_button="Quit")
     app.menu = [rumps.MenuItem("Send test notification", callback=send)]
+
+    def auto(timer: rumps.Timer) -> None:
+        timer.stop()
+        send(None)
+
+    rumps.Timer(auto, 3).start()
     print("authorised:", notifier.request_authorisation(), flush=True)
     app.run()
 
