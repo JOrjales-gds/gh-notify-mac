@@ -1,2 +1,3 @@
-def main() -> None:
-    print("Hello from gh-notify!")
+from gh_notify.cli import main
+
+__all__ = ["main"]
