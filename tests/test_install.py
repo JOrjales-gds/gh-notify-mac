@@ -35,6 +35,33 @@ def test_current_runtime_points_at_real_files():
     assert runtime.path
 
 
+def test_find_libpython_standalone_layout(tmp_path):
+    lib = tmp_path / "lib" / "libpython3.13.dylib"
+    lib.parent.mkdir()
+    lib.touch()
+    assert bundle.find_libpython(tmp_path, "libpython3.13.dylib") == lib
+
+
+def test_find_libpython_framework_layout(tmp_path):
+    # Homebrew: base_prefix is the Versions/3.14 directory, LDLIBRARY is framework-relative
+    lib = tmp_path / "Python"
+    lib.touch()
+    (tmp_path / "lib").mkdir()
+    ldlibrary = "Python.framework/Versions/3.14/Python"
+    assert bundle.find_libpython(tmp_path, ldlibrary) == lib
+
+
+def test_find_libpython_reports_searched_paths(tmp_path):
+    with pytest.raises(bundle.BundleError, match="libpython not found") as exc:
+        bundle.find_libpython(tmp_path, "libpython3.13.dylib")
+    assert str(tmp_path / "lib" / "libpython3.13.dylib") in str(exc.value)
+
+
+def test_find_libpython_without_ldlibrary(tmp_path):
+    with pytest.raises(bundle.BundleError, match="LDLIBRARY"):
+        bundle.find_libpython(tmp_path, "")
+
+
 def test_build_bundle_is_signed_idempotent_and_runs_python(tmp_path):
     app = tmp_path / "T.app"
     launcher = bundle.build_bundle(app)

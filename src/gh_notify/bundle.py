@@ -69,12 +69,28 @@ class PythonRuntime:
     path: str
 
 
+def find_libpython(home: Path, ldlibrary: str) -> Path:
+    """Locate the shared Python library for an interpreter installed at `home`.
+
+    `ldlibrary` is sysconfig's LDLIBRARY. Standalone builds give a bare file name that
+    lives in `home/lib`. Framework builds (Homebrew, python.org) give a path such as
+    `Python.framework/Versions/3.14/Python`, and the library sits directly in `home`.
+    """
+    name = Path(ldlibrary).name
+    if not name:
+        raise BundleError("This Python does not report a shared library (LDLIBRARY).")
+    candidates = [home / "lib" / ldlibrary, home / "lib" / name, home / name]
+    for candidate in candidates:
+        if candidate.is_file():
+            return candidate
+    searched = ", ".join(str(c) for c in candidates)
+    raise BundleError(f"libpython not found. Looked in: {searched}")
+
+
 def current_runtime() -> PythonRuntime:
     """Describe the interpreter and package locations of the running environment."""
     home = Path(sys.base_prefix)
-    libpython = home / "lib" / (sysconfig.get_config_var("LDLIBRARY") or "")
-    if not libpython.is_file():
-        raise BundleError(f"libpython not found at {libpython}")
+    libpython = find_libpython(home, sysconfig.get_config_var("LDLIBRARY") or "")
     site_packages = sysconfig.get_paths()["purelib"]
     package_root = str(Path(gh_notify.__file__).resolve().parent.parent)
     entries = list(dict.fromkeys([site_packages, package_root]))
